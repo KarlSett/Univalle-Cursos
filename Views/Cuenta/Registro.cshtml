@@ -1,0 +1,56 @@
+@model RegistroModelo
+@{ ViewData["Title"] = "Crear cuenta"; }
+<div class="auth-grid">
+    <section class="auth-story">
+        <h2>Aprender también<br />es abrir posibilidades.</h2>
+        <p>Una cuenta, cursos gratuitos y nuevas habilidades. Tu próximo paso comienza contigo.</p>
+        <partial name="_Portada" model='@("css")' />
+    </section>
+    <section class="auth-form">
+        <h1>Empieza por ti.</h1>
+        <p>Crea tu cuenta y encuentra algo nuevo que aprender.</p>
+        <form asp-action="Registro" method="post">
+            <input asp-for="ReturnUrl" type="hidden" />
+            <div asp-validation-summary="ModelOnly" role="alert">
+            </div>
+            <div class="form-field">
+                <label asp-for="Nombre">
+                </label>
+                <input asp-for="Nombre" autocomplete="name" placeholder="¿Cómo te llamas?" maxlength="80" required />
+                <span asp-validation-for="Nombre">
+                </span>
+            </div>
+            <div class="form-field">
+                <label asp-for="Email">
+                </label>
+                <input asp-for="Email" type="email" autocomplete="username" placeholder="tu@correo.com" maxlength="256" required />
+                <span asp-validation-for="Email">
+                </span>
+            </div>
+            <div class="form-field">
+                <label asp-for="Password">
+                </label>
+                <div class="password-field">
+                    <input asp-for="Password" autocomplete="new-password" minlength="8" maxlength="100" aria-describedby="clave-ayuda" required />
+                    <button class="password-toggle" type="button" data-campo="Password" aria-label="Mostrar u ocultar contraseña" aria-pressed="false">Mostrar</button>
+                </div>
+                <small id="clave-ayuda">Al menos 8 caracteres, una mayúscula, una minúscula y un número.</small>
+                <span asp-validation-for="Password">
+                </span>
+            </div>
+            <div class="form-field">
+                <label asp-for="Confirmacion">
+                </label>
+                <input asp-for="Confirmacion" autocomplete="new-password" maxlength="100" required />
+                <span asp-validation-for="Confirmacion">
+                </span>
+            </div>
+            <button class="button button-primary full-width" type="submit">Crear mi cuenta <svg class="icon">
+                    <use href="/img/icons.svg#arrow" />
+                </svg>
+            </button>
+        </form>
+        <p class="auth-switch">¿Ya tienes cuenta? <a class="text-link" asp-action="Ingresar" asp-route-returnUrl="@Model.ReturnUrl">Inicia sesión</a>
+        </p>
+    </section>
+</div>

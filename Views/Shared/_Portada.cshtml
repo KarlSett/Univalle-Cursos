@@ -1,0 +1,84 @@
+@model string
+<div class="course-art art-@Model" aria-hidden="true">
+    @switch (Model)
+    {
+    case "sql":
+    <svg viewBox="0 0 400 200" focusable="false">
+        <rect x="73" y="28" width="254" height="144" rx="8" class="art-sheet"/>
+        <path d="M73 64h254M73 99h254M73 134h254M151 64v108M239 64v108" class="art-line"/>
+        <text x="91" y="51" class="art-label">Cursos</text>
+        <text x="91" y="87">Id</text>
+        <text x="167" y="87">Título</text>
+        <text x="255" y="87">Nivel</text>
+        <text x="91" y="122">1</text>
+        <text x="167" y="122">SQL</text>
+        <text x="255" y="122">Inicial</text>
+        <text x="91" y="157">2</text>
+        <text x="167" y="157">HTML</text>
+        <text x="255" y="157">Inicial</text>
+    </svg>
+    break;
+    case "git":
+    <svg viewBox="0 0 400 200" focusable="false">
+        <path d="M93 131h214M151 131c28 0 24-63 56-63h72" class="art-branch"/>
+        <circle cx="94" cy="131" r="9"/>
+        <circle cx="151" cy="131" r="9"/>
+        <circle cx="232" cy="131" r="9"/>
+        <circle cx="307" cy="131" r="9"/>
+        <circle cx="218" cy="68" r="9"/>
+        <circle cx="278" cy="68" r="9"/>
+        <text x="84" y="163">main</text>
+        <text x="205" y="42">mi-rama</text>
+    </svg>
+    break;
+    case "css":
+    <svg viewBox="0 0 400 200" focusable="false">
+        <rect x="77" y="27" width="246" height="146" rx="8" class="art-sheet"/>
+        <rect x="90" y="40" width="220" height="24" rx="3"/>
+        <rect x="90" y="76" width="65" height="84" rx="3" class="art-tint"/>
+        <rect x="167" y="76" width="143" height="36" rx="3" class="art-tint"/>
+        <rect x="167" y="124" width="65" height="36" rx="3" class="art-tint"/>
+        <rect x="245" y="124" width="65" height="36" rx="3" class="art-tint"/>
+        <text x="102" y="143">grid</text>
+    </svg>
+    break;
+    case "csharp":
+    <svg viewBox="0 0 400 200" focusable="false">
+        <rect x="72" y="25" width="256" height="150" rx="8" class="art-sheet"/>
+        <text x="91" y="52" class="art-label">Curso.cs</text>
+        <path d="M72 65h256" class="art-line"/>
+        <text x="92" y="92" class="code-text">public class Curso</text>
+        <text x="92" y="115" class="code-text">{</text>
+        <text x="111" y="138" class="code-text">string Titulo;</text>
+        <text x="92" y="161" class="code-text">}</text>
+    </svg>
+    break;
+    case "excel":
+    <svg viewBox="0 0 400 200" focusable="false">
+        <rect x="75" y="25" width="250" height="150" rx="8" class="art-sheet"/>
+        <rect x="90" y="38" width="220" height="26" rx="3" class="art-tint"/>
+        <text x="103" y="56" class="code-text">=SUMA(B2:B4)</text>
+        <path d="M90 77h220M90 108h220M90 139h220M90 170h220M90 77v93M200 77v93M310 77v93" class="art-line"/>
+        <text x="108" y="98">HTML</text>
+        <text x="251" y="98">35</text>
+        <text x="108" y="129">SQL</text>
+        <text x="251" y="129">45</text>
+        <text x="108" y="160">Git</text>
+        <text x="251" y="160">35</text>
+    </svg>
+    break;
+    default:
+    <svg viewBox="0 0 400 200" focusable="false">
+        <rect x="66" y="25" width="268" height="150" rx="8" class="art-sheet"/>
+        <circle cx="82" cy="40" r="3"/>
+        <circle cx="94" cy="40" r="3"/>
+        <circle cx="106" cy="40" r="3"/>
+        <path d="M66 55h268" class="art-line"/>
+        <text x="88" y="84" class="code-text">&lt;main&gt;</text>
+        <text x="106" y="109" class="code-text">&lt;h1&gt;Hola, mundo.&lt;/h1&gt;</text>
+        <text x="106" y="134" class="code-text">&lt;p&gt;Este es mi comienzo.&lt;/p&gt;</text>
+        <text x="88" y="159" class="code-text">&lt;/main&gt;</text>
+    </svg>
+    break;
+    }
+</div>

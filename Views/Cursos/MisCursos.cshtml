@@ -1,0 +1,64 @@
+@model List<TarjetaCurso>
+@{ ViewData["Title"] = "Mis cursos"; }
+<div class="page-heading">
+    <div>
+        <h1>Tu aprendizaje, en marcha.</h1>
+        <p>Retoma donde lo dejaste. Cada lección cuenta.</p>
+    </div>
+    <a class="button button-secondary" asp-action="Index">Explorar catálogo <svg class="icon">
+            <use href="/img/icons.svg#arrow" />
+        </svg>
+    </a>
+</div>
+<div class="stats-strip">
+    <div>
+        <strong>@Model.Count</strong>
+        <span>Cursos inscritos</span>
+    </div>
+    <div>
+        <strong>@Model.Count(c => c.Lecciones > 0 && c.Progreso == 100)</strong>
+        <span>Cursos completados</span>
+    </div>
+    <div>
+        <strong>@Model.Sum(c => c.Completadas)</strong>
+        <span>Lecciones completadas</span>
+    </div>
+</div>
+@if (Model.Count == 0)
+{
+<div class="empty-state">
+    <h2>Tu primer curso te espera</h2>
+    <p>Elige algo que te interese e inscríbete gratis para comenzar.</p>
+    <a class="button button-primary" asp-action="Index">Encontrar un curso</a>
+</div>
+}
+else
+{
+<div class="my-course-list">
+    @foreach (var curso in Model)
+    {
+    <article class="my-course panel">
+        <div>
+            <partial name="_Portada" model="curso.Portada" />
+        </div>
+        <div>
+            <span class="muted small">@curso.Categoria · @curso.Nivel</span>
+            <h2>@curso.Titulo</h2>
+            <div class="progress-caption">
+                <span>@curso.Completadas de @curso.Lecciones lecciones</span>
+                <strong>@curso.Progreso%</strong>
+            </div>
+            <progress max="100" value="@curso.Progreso">@curso.Progreso%</progress>
+        </div>
+        <div>
+            @if (curso.Publicado) { <a class="button button-secondary" asp-action="Detalle" asp-route-id="@curso.Id">@(curso.Progreso == 100 ? "Repasar" : "Continuar") <svg class="icon">
+                    <use href="/img/icons.svg#arrow" />
+                </svg>
+            </a> }
+            else { <span class="badge">No disponible</span>
+            <p class="small muted">El curso está retirado.<br />Tu progreso se conserva.</p> }
+        </div>
+    </article>
+    }
+</div>
+}

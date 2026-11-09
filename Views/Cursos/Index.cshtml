@@ -1,0 +1,107 @@
+@model CatalogoModelo
+@{ ViewData["Title"] = "Catálogo de cursos"; }
+<div class="page-heading">
+    <div>
+        <h1>Aprende algo nuevo.</h1>
+        <p>Pequeños cursos. Habilidades que se quedan contigo.</p>
+    </div>
+    <span class="quiet-label">@Model.TotalPublicados cursos · 100% gratuitos</span>
+</div>
+<section class="welcome-panel" aria-labelledby="welcome-title">
+    <div class="welcome-copy">
+        <h2 id="welcome-title">Tu próximo paso<br />empieza aquí.</h2>
+        <p>Tecnología para todos, a tu ritmo.<br />Elige un curso y aprende una lección a la vez.</p>
+        <a class="button button-primary" href="#catalogo">Explorar cursos <svg class="icon">
+                <use href="/img/icons.svg#arrow" />
+            </svg>
+        </a>
+    </div>
+    <div class="welcome-art">
+        <partial name="_Portada" model='@("web")' />
+        <span>Una idea. Un primer proyecto. Tú.</span>
+    </div>
+</section>
+<section id="catalogo" aria-labelledby="catalogo-title">
+    <div class="section-heading">
+        <h2 id="catalogo-title">Encuentra tu siguiente curso</h2>
+        <span class="muted">@Model.Cursos.Count resultados</span>
+    </div>
+    <form method="get" asp-action="Index" class="catalog-filters" role="search">
+        <div class="search-field">
+            <svg class="icon">
+                <use href="/img/icons.svg#search" />
+            </svg>
+            <label class="sr-only" for="buscar">Buscar cursos</label>
+            <input id="buscar" name="buscar" value="@Model.Buscar" maxlength="100" placeholder="¿Qué quieres aprender?" />
+        </div>
+        <label class="sr-only" for="nivel">Nivel</label>
+        <select asp-for="Nivel" id="nivel" name="nivel">
+            <option value="">Todos los niveles</option>
+            <option value="Inicial">Inicial</option>
+            <option value="Intermedio">Intermedio</option>
+        </select>
+        <label class="sr-only" for="orden">Orden</label>
+        <select asp-for="Orden" id="orden" name="orden">
+            <option value="">Más recientes</option>
+            <option value="titulo">Título: A–Z</option>
+        </select>
+        <input type="hidden" name="categoria" value="@Model.Categoria" />
+        <button class="button button-secondary" type="submit">Buscar</button>
+    </form>
+    <nav class="category-tabs" aria-label="Filtrar por categoría">
+        <a class="@(string.IsNullOrEmpty(Model.Categoria) ? "selected" : "")" asp-action="Index" asp-route-buscar="@Model.Buscar" asp-route-nivel="@Model.Nivel" asp-route-orden="@Model.Orden">Todos los cursos</a>
+        @foreach (var categoria in OpcionesCurso.Categorias)
+        {
+        <a class="@(Model.Categoria == categoria ? "selected" : "")" asp-action="Index" asp-route-categoria="@categoria" asp-route-buscar="@Model.Buscar" asp-route-nivel="@Model.Nivel" asp-route-orden="@Model.Orden">@categoria</a>
+        }
+    </nav>
+    @if (Model.Cursos.Count == 0)
+    {
+    <div class="empty-state">
+        <h3>No encontramos esos cursos</h3>
+        <p>Prueba con otra palabra o explora todo el catálogo.</p>
+        <a class="button button-secondary" asp-action="Index">Quitar filtros</a>
+    </div>
+    }
+    else
+    {
+    <div class="course-grid">
+        @foreach (var curso in Model.Cursos)
+        {
+        <article class="course-card">
+            <a class="cover-link" asp-action="Detalle" asp-route-id="@curso.Id" aria-label="Ver @curso.Titulo">
+                <partial name="_Portada" model="curso.Portada" />
+            </a>
+            <div class="course-card-body">
+                <div class="card-labels">
+                    <span>@curso.Categoria</span>
+                    <span class="badge">@curso.Nivel</span>
+                </div>
+                <h3>
+                    <a asp-action="Detalle" asp-route-id="@curso.Id">@curso.Titulo</a>
+                </h3>
+                <p>@curso.Descripcion</p>
+                <div class="course-meta">
+                    <span>
+                        <svg class="icon">
+                            <use href="/img/icons.svg#book" />
+                        </svg>@curso.Lecciones lecciones</span>
+                    <span>
+                        <svg class="icon">
+                            <use href="/img/icons.svg#clock" />
+                        </svg>@curso.Minutos min</span>
+                </div>
+                <div class="card-footer">
+                    <span class="free-label">Gratis</span>
+                    <a asp-action="Detalle" asp-route-id="@curso.Id">Ver curso <svg class="icon">
+                            <use href="/img/icons.svg#arrow" />
+                        </svg>
+                        <span class="sr-only">: @curso.Titulo</span>
+                    </a>
+                </div>
+            </div>
+        </article>
+        }
+    </div>
+    }
+</section>

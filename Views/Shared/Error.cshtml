@@ -1,0 +1,6 @@
+@model ErrorViewModel
+@{ ViewData["Title"] = "Ocurrió un problema"; }
+<div class="error-page panel">
+    <h1>No pudimos completar la solicitud.</h1>
+    <p>Inténtalo nuevamente en unos momentos.</p>
+    <a class="button button-primary" asp-controller="Cursos" asp-action="Index">Volver al catálogo</a>@if (Model.ShowRequestId) { <p class="small muted">Referencia: @Model.RequestId</p> }</div>

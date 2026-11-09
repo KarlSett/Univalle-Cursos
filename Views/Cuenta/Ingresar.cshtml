@@ -1,0 +1,45 @@
+@model LoginModelo
+@{ ViewData["Title"] = "Iniciar sesión"; }
+<div class="auth-grid">
+    <section class="auth-story">
+        <h2>Un pequeño paso.<br />Una nueva habilidad.</h2>
+        <p>Vuelve a tus cursos y continúa aprendiendo a tu ritmo.</p>
+        <partial name="_Portada" model='@("web")' />
+    </section>
+    <section class="auth-form">
+        <h1>Qué bueno verte.</h1>
+        <p>Ingresa para continuar con tus cursos.</p>
+        <form asp-action="Ingresar" method="post">
+            <input asp-for="ReturnUrl" type="hidden" />
+            <div asp-validation-summary="ModelOnly" role="alert">
+            </div>
+            <div class="form-field">
+                <label asp-for="Email">
+                </label>
+                <input asp-for="Email" type="email" autocomplete="username" placeholder="tu@correo.com" maxlength="256" required />
+                <span asp-validation-for="Email">
+                </span>
+            </div>
+            <div class="form-field">
+                <label asp-for="Password">
+                </label>
+                <div class="password-field">
+                    <input asp-for="Password" autocomplete="current-password" required />
+                    <button class="password-toggle" type="button" data-campo="Password" aria-label="Mostrar u ocultar contraseña" aria-pressed="false">Mostrar</button>
+                </div>
+                <span asp-validation-for="Password">
+                </span>
+            </div>
+            <label class="checkbox-field">
+                <input asp-for="Recordarme" />
+                <span>Mantener mi sesión</span>
+            </label>
+            <button class="button button-primary full-width" type="submit">Iniciar sesión <svg class="icon">
+                    <use href="/img/icons.svg#arrow" />
+                </svg>
+            </button>
+        </form>
+        <p class="auth-switch">¿Es tu primera vez? <a class="text-link" asp-action="Registro" asp-route-returnUrl="@Model.ReturnUrl">Crea tu cuenta gratis</a>
+        </p>
+    </section>
+</div>

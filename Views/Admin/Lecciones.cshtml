@@ -1,0 +1,59 @@
+@model Curso
+@{ ViewData["Title"] = "Lecciones del curso"; var lecciones = Model.Lecciones.OrderBy(l => l.Orden).ThenBy(l => l.Id).ToList(); }
+<a class="back-link" asp-action="Index">← Volver a administración</a>
+<div class="page-heading">
+    <div>
+        <h1>@Model.Titulo</h1>
+        <p>@lecciones.Count lecciones · @lecciones.Sum(l => l.DuracionMinutos) minutos · @(Model.Publicado ? "Publicado" : "Borrador")</p>
+    </div>
+    <a class="button button-primary" asp-action="CrearLeccion" asp-route-cursoId="@Model.Id">
+        <svg class="icon">
+            <use href="/img/icons.svg#plus" />
+        </svg>Agregar lección</a>
+</div>
+<div class="admin-intro">
+    <div>
+        <h2>Un recorrido con sentido</h2>
+        <p>Usa las flechas para cambiar el orden de las lecciones.</p>
+    </div>
+    <a class="text-link" asp-action="Inscritos" asp-route-id="@Model.Id">Consultar inscritos →</a>
+</div>
+@if (lecciones.Count == 0)
+{
+<div class="empty-state">
+    <h2>Aquí empieza tu curso</h2>
+    <p>Agrega una primera lección con contenido y una duración estimada.</p>
+</div>
+}
+else
+{
+<div class="lesson-admin-list">
+    @for (int i = 0; i < lecciones.Count; i++)
+    {
+    var leccion = lecciones[i];
+    <div class="lesson-admin-row panel">
+        <span class="lesson-number">@(i + 1)</span>
+        <div class="lesson-admin-title">
+            <strong>@leccion.Titulo</strong>
+            <small>@leccion.DuracionMinutos min de lectura y práctica</small>
+        </div>
+        <div class="order-controls">
+            <form asp-action="MoverLeccion" asp-route-id="@leccion.Id" method="post">
+                <input type="hidden" name="direccion" value="-1" />
+                <button type="submit" disabled="@(i == 0)" aria-label="Subir @leccion.Titulo">↑</button>
+            </form>
+            <form asp-action="MoverLeccion" asp-route-id="@leccion.Id" method="post">
+                <input type="hidden" name="direccion" value="1" />
+                <button type="submit" disabled="@(i == lecciones.Count - 1)" aria-label="Bajar @leccion.Titulo">↓</button>
+            </form>
+        </div>
+        <div class="table-actions">
+            <a asp-action="EditarLeccion" asp-route-id="@leccion.Id">Editar</a>
+            <form asp-action="EliminarLeccion" asp-route-id="@leccion.Id" method="post" data-confirmar="¿Eliminar «@leccion.Titulo»? Se perderán sus marcas de completado. Si es la última lección, el curso se retirará del catálogo.">
+                <button type="submit">Eliminar</button>
+            </form>
+        </div>
+    </div>
+    }
+</div>
+}

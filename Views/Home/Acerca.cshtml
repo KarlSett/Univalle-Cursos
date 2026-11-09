@@ -1,0 +1,27 @@
+@{ ViewData["Title"] = "Cómo funciona"; }
+<div class="info-layout">
+    <h1>Aprende a tu manera.</h1>
+    <p class="lead">Univalle Abierta es un portal de microcursos y tutoriales técnicos gratuitos. Está pensado para estudiantes, docentes, personal administrativo y cualquier persona con ganas de aprender.</p>
+    <section class="panel">
+        <h2>Del interés a la práctica</h2>
+        <ol>
+            <li>
+                <strong>Explora.</strong> Revisa el catálogo, el nivel, la duración y el temario. Puedes hacerlo sin crear una cuenta.</li>
+            <li>
+                <strong>Inscríbete.</strong> Crea tu cuenta de suscriptor e inscríbete gratis en el curso que elijas.</li>
+            <li>
+                <strong>Aprende.</strong> Lee las lecciones, prueba los ejemplos y márcalas como completadas.</li>
+            <li>
+                <strong>Continúa.</strong> Vuelve a Mis cursos para consultar tu progreso y retomar tu aprendizaje.</li>
+        </ol>
+        <a class="button button-primary" asp-controller="Cursos" asp-action="Index">Encontrar mi próximo curso <svg class="icon">
+                <use href="/img/icons.svg#arrow" />
+            </svg>
+        </a>
+    </section>
+    <section class="panel">
+        <h2>Breve, abierto y a tu ritmo</h2>
+        <p>Las lecciones incluyen texto y prácticas sencillas. La duración es una estimación que combina lectura y práctica. Puedes repasar el contenido de los cursos en los que estás inscrito mientras permanezcan publicados.</p>
+        <p>Si un curso se retira temporalmente, se conservan tu inscripción y tu progreso. El acceso se restablece cuando se vuelve a publicar.</p>
+    </section>
+</div>
