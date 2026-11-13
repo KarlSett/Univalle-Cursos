@@ -1,142 +1,65 @@
-@using Microsoft.AspNetCore.Identity
-@inject UserManager<Usuario> Usuarios
-@{
-var usuario = User.Identity?.IsAuthenticated == true ? await Usuarios.GetUserAsync(User) : null;
-var controlador = ViewContext.RouteData.Values["controller"]?.ToString();
-var accion = ViewContext.RouteData.Values["action"]?.ToString();
-var misCursos = controlador == "Cursos" && accion == "MisCursos";
-var categoriaActual = Context.Request.Query["categoria"].ToString();
-}
 <!DOCTYPE html>
 <html lang="es">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="description" content="Aprende tecnología a tu ritmo. Microcursos y tutoriales gratuitos de Univalle Abierta." />
-        <title>@ViewData["Title"] · Univalle Abierta</title>
-        <link rel="icon" type="image/svg+xml" href="~/img/marca.svg" />
-        <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    </head>
-    <body>
-        <a class="skip-link" href="#contenido">Saltar al contenido</a>
-        <button class="sidebar-overlay" type="button" aria-label="Cerrar menú" tabindex="-1">
-        </button>
-        <aside class="sidebar" id="sidebar" aria-label="Navegación principal">
-            <a class="brand" asp-controller="Cursos" asp-action="Index">
-                <img src="~/img/marca.svg" width="35" height="40" alt="" />
-                <span>univalle<span class="brand-subtitle">abierta</span>
-                </span>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] - Univalle Cursos</title>
+    <link rel="icon" href="~/img/logo-univalle.png" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header class="navbar">
+        <div class="navbar-contenido">
+            <a class="logo" asp-controller="Cursos" asp-action="Index">
+                <img src="~/img/logo-univalle.png" alt="Logo Univalle" />
+                Univalle Cursos
             </a>
-            <div class="sidebar-main">
-                <span class="nav-label">Tu espacio de aprendizaje</span>
-                <nav class="main-nav">
-                    <a class="@(controlador == "Cursos" && !misCursos && string.IsNullOrEmpty(categoriaActual) ? "active" : "")" asp-controller="Cursos" asp-action="Index">
-                        <svg class="icon">
-                            <use href="/img/icons.svg#grid" />
-                        </svg>Explorar cursos</a>
-                    @if (!User.IsInRole("Administrador")) { <a class="@(misCursos ? "active" : "")" asp-controller="Cursos" asp-action="MisCursos">
-                        <svg class="icon">
-                            <use href="/img/icons.svg#book" />
-                        </svg>Mis cursos</a> }
-                    @if (User.IsInRole("Administrador")) { <a class="@(controlador == "Admin" ? "active" : "")" asp-controller="Admin" asp-action="Index">
-                        <svg class="icon">
-                            <use href="/img/icons.svg#admin" />
-                        </svg>Administración</a> }
-                </nav>
-                <span class="nav-label category-label">Explora por tema</span>
-                <nav class="main-nav">
-                    @foreach (var categoria in OpcionesCurso.Categorias)
-                    {
-                    var icono = categoria == "Desarrollo" ? "code" : categoria == "Datos" ? "chart" : categoria == "Diseño web" ? "paint" : "tool";
-                    <a class="@(categoriaActual == categoria && controlador == "Cursos" ? "active" : "")" asp-controller="Cursos" asp-action="Index" asp-route-categoria="@categoria">
-                        <svg class="icon">
-                            <use href="/img/icons.svg#@icono" />
-                        </svg>@categoria</a>
-                    }
-                </nav>
-            </div>
-            <div class="sidebar-bottom">
-                <div class="sidebar-note">
-                    <strong>El conocimiento<br />es para compartir.</strong>
-                    <p>Cursos abiertos para seguir creciendo.</p>
-                    <a asp-controller="Home" asp-action="Acerca">Conoce el portal <span>↗</span>
-                    </a>
-                </div>
-                <a class="help-link" asp-controller="Home" asp-action="Acerca">
-                    <svg class="icon">
-                        <use href="/img/icons.svg#help" />
-                    </svg>¿Cómo funciona?</a>
-                @if (usuario != null)
+
+            <nav class="menu">
+                <a asp-controller="Cursos" asp-action="Index">Catálogo</a>
+
+                @if (User.IsInRole("Suscriptor"))
                 {
-                <div class="sidebar-account">
-                    <span class="avatar">@usuario.Nombre.Substring(0, 1).ToUpper()</span>
-                    <div>
-                        <strong>@usuario.Nombre</strong>
-                        <small>@(User.IsInRole("Administrador") ? "Administrador" : "Suscriptor")</small>
-                    </div>
-                </div>
-                <form asp-controller="Cuenta" asp-action="Salir" method="post">
-                    <button class="logout-button" type="submit">Cerrar sesión</button>
-                </form>
+                    <a asp-controller="Cursos" asp-action="MisCursos">Mis cursos</a>
+                }
+
+                @if (User.IsInRole("Administrador"))
+                {
+                    <a asp-controller="Admin" asp-action="Index">Administración</a>
+                }
+
+                @if (User.Identity!.IsAuthenticated)
+                {
+                    <span class="usuario">@User.Identity.Name</span>
+                    <form class="en-linea" asp-controller="Cuenta" asp-action="Salir" method="post">
+                        <button class="boton boton-secundario boton-chico" type="submit">Salir</button>
+                    </form>
                 }
                 else
                 {
-                <div class="guest-note">
-                    <svg class="icon">
-                        <use href="/img/icons.svg#user" />
-                    </svg>
-                    <span>Estás explorando como invitado</span>
-                </div>
+                    <a asp-controller="Cuenta" asp-action="Ingresar">Ingresar</a>
+                    <a class="boton boton-chico" asp-controller="Cuenta" asp-action="Registro">Registrarse</a>
                 }
-            </div>
-        </aside>
-        <div class="app-shell">
-            <header class="topbar">
-                <div class="topbar-location">
-                    <button class="menu-toggle" type="button" aria-controls="sidebar" aria-expanded="false" aria-label="Abrir menú">
-                        <svg class="icon">
-                            <use href="/img/icons.svg#menu" />
-                        </svg>
-                    </button>
-                    <a class="mobile-wordmark" asp-controller="Cursos" asp-action="Index">
-                        <img src="~/img/marca.svg" width="22" height="27" alt="" />
-                        <span>univalle<small>abierta</small>
-                        </span>
-                    </a>
-                    <span>Campus abierto</span>
-                    <span class="breadcrumb-slash">/</span>
-                    <strong>@(controlador == "Admin" ? "Administración" : misCursos ? "Mis cursos" : controlador == "Cuenta" ? "Mi cuenta" : controlador == "Lecciones" ? "Mi aprendizaje" : "Microcursos")</strong>
-                </div>
-                <div class="topbar-actions">
-                    @if (usuario == null)
-                    {
-                    <a class="login-link" asp-controller="Cuenta" asp-action="Ingresar">Iniciar sesión</a>
-                    <a class="button button-primary button-small" asp-controller="Cuenta" asp-action="Registro">Crear cuenta <svg class="icon">
-                            <use href="/img/icons.svg#arrow" />
-                        </svg>
-                    </a>
-                    }
-                    else { <span class="account-label">@usuario.Nombre</span>
-                    <span class="avatar small-avatar">@usuario.Nombre.Substring(0, 1).ToUpper()</span> }
-                </div>
-            </header>
-            <main id="contenido" class="main-content">
-                @if (TempData["Exito"] is string exito) { <div class="notice notice-success" role="status">
-                    <svg class="icon">
-                        <use href="/img/icons.svg#check" />
-                    </svg>
-                    <span>@exito</span>
-                </div> }
-                @if (TempData["Error"] is string error) { <div class="notice notice-error" role="alert">@error</div> }
-                @RenderBody()
-            </main>
-            <footer class="site-footer">
-                <span>Univalle Abierta · Aprende a tu ritmo.</span>
-                <a asp-controller="Home" asp-action="Privacy">Privacidad</a>
-            </footer>
+            </nav>
         </div>
-        <script src="~/js/site.js" asp-append-version="true" defer>
-        </script>
-        @await RenderSectionAsync("Scripts", required: false)
-    </body>
+    </header>
+
+    <main class="contenedor">
+        @* mensajes de tempdata *@
+        @if (TempData["Exito"] != null)
+        {
+            <div class="mensaje mensaje-exito">@TempData["Exito"]</div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="mensaje mensaje-error">@TempData["Error"]</div>
+        }
+
+        @RenderBody()
+    </main>
+
+    <footer class="footer">
+        Universidad Privada del Valle - Portal de Microcursos y Tutoriales
+    </footer>
+</body>
 </html>
