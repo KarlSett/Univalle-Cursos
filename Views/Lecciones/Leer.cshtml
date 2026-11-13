@@ -1,66 +1,65 @@
-@model LecturaModelo
+@model LeerLeccionModelo
 @{
-ViewData["Title"] = Model.Leccion.Titulo;
-int posicion = Model.Lecciones.FindIndex(l => l.Id == Model.Leccion.Id);
-var anterior = posicion > 0 ? Model.Lecciones[posicion - 1] : null;
-var siguiente = posicion < Model.Lecciones.Count - 1 ? Model.Lecciones[posicion + 1] : null;
+    ViewData["Title"] = Model.Leccion.Titulo;
+    int total = Model.Lecciones.Count;
+    int porcentaje = total == 0 ? 0 : Model.Completadas.Count * 100 / total;
+    bool completada = Model.Completadas.Contains(Model.Leccion.Id);
+
+    // anterior y siguiente
+    var anterior = Model.Lecciones.LastOrDefault(l => l.Orden < Model.Leccion.Orden);
+    var siguiente = Model.Lecciones.FirstOrDefault(l => l.Orden > Model.Leccion.Orden);
 }
-<a class="back-link" asp-controller="Cursos" asp-action="Detalle" asp-route-id="@Model.Leccion.CursoId">← @Model.Leccion.Curso.Titulo</a>
-<div class="reading-grid">
-    <aside class="reading-nav panel">
-        <h2>Tu recorrido</h2>
-        <div class="progress-caption">
-            <span>@Model.Completadas.Count / @Model.Lecciones.Count lecciones</span>
-            <strong>@Model.Progreso%</strong>
+
+<a class="volver" asp-controller="Cursos" asp-action="Detalle" asp-route-id="@Model.Leccion.CursoId">← @Model.Leccion.Curso.Titulo</a>
+
+<div class="dos-columnas">
+    <div class="caja">
+        <small class="minutos">Lección @Model.Leccion.Orden de @total · @Model.Leccion.DuracionMinutos min</small>
+        <h1>@Model.Leccion.Titulo</h1>
+
+        @* texto escapado, no ejecuta html *@
+        <div class="contenido-leccion">@Model.Leccion.Contenido</div>
+
+        <hr />
+        <div class="acciones">
+            @if (completada)
+            {
+                <span class="completada">✔ Ya completaste esta lección</span>
+            }
+            else
+            {
+                <form asp-action="Completar" asp-route-id="@Model.Leccion.Id" method="post">
+                    <button class="boton" type="submit">Marcar como completada</button>
+                </form>
+            }
         </div>
-        <progress max="100" value="@Model.Progreso">@Model.Progreso%</progress>
-        <ol class="lesson-list">
+        <br />
+        <div class="acciones">
+            @if (anterior != null)
+            {
+                <a class="boton boton-secundario" asp-action="Leer" asp-route-id="@anterior.Id">← Anterior</a>
+            }
+            @if (siguiente != null)
+            {
+                <a class="boton boton-secundario" asp-action="Leer" asp-route-id="@siguiente.Id">Siguiente →</a>
+            }
+        </div>
+    </div>
+
+    <div class="caja">
+        <h3>Progreso: @porcentaje%</h3>
+        <div class="barra"><div style="width: @porcentaje%"></div></div>
+        <ol class="lista-lecciones">
             @foreach (var leccion in Model.Lecciones)
             {
-            <li>
-                <span class="lesson-number">@leccion.Orden</span>
-                <div>
-                    <a class="@(leccion.Id == Model.Leccion.Id ? "current" : "")" asp-action="Leer" asp-route-id="@leccion.Id" aria-current="@(leccion.Id == Model.Leccion.Id ? "page" : null)">@leccion.Titulo</a>
-                    <small>@leccion.DuracionMinutos min</small>
-                </div>@if (Model.Completadas.Contains(leccion.Id)) { <svg class="icon lesson-status">
-                    <use href="/img/icons.svg#check" />
-                </svg> }</li>
+                <li class="@(leccion.Id == Model.Leccion.Id ? "actual" : "")">
+                    <a asp-action="Leer" asp-route-id="@leccion.Id">@leccion.Orden. @leccion.Titulo</a>
+                    @if (Model.Completadas.Contains(leccion.Id))
+                    {
+                        <span class="completada">✔</span>
+                    }
+                </li>
             }
         </ol>
-    </aside>
-    <article class="reading-article panel">
-        <div class="reading-meta">
-            <span>Lección @(posicion + 1) de @Model.Lecciones.Count</span>
-            <span>@Model.Leccion.DuracionMinutos min</span>
-        </div>
-        <h1>@Model.Leccion.Titulo</h1>
-        <div class="lesson-content">
-            @foreach (var parrafo in Model.Leccion.Contenido.Replace("\r\n", "\n").Split("\n\n", StringSplitOptions.RemoveEmptyEntries))
-            {
-            <p>@parrafo</p>
-            }
-        </div>
-        <div class="reading-actions">
-            @if (Model.Completadas.Contains(Model.Leccion.Id)) { <span class="completion-state">
-                <svg class="icon">
-                    <use href="/img/icons.svg#check" />
-                </svg>Lección completada</span> }
-            else { <form asp-action="Completar" asp-route-id="@Model.Leccion.Id" method="post">
-                <button class="button button-primary" type="submit">
-                    <svg class="icon">
-                        <use href="/img/icons.svg#check" />
-                    </svg>Marcar como completada</button>
-            </form> }
-            @if (siguiente != null) { <a class="button button-secondary" asp-action="Leer" asp-route-id="@siguiente.Id">Siguiente lección <svg class="icon">
-                    <use href="/img/icons.svg#arrow" />
-                </svg>
-            </a> }
-            else { <a class="button button-secondary" asp-controller="Cursos" asp-action="MisCursos">Volver a mis cursos</a> }
-        </div>
-        <nav class="next-lesson" aria-label="Navegación de lecciones">
-            @if (anterior != null) { <a asp-action="Leer" asp-route-id="@anterior.Id">← Lección anterior</a> }
-            else { <a asp-controller="Cursos" asp-action="Detalle" asp-route-id="@Model.Leccion.CursoId">← Ver temario</a> }
-            <span>@(Model.Progreso == 100 ? "Curso completado. ¡Buen trabajo!" : "Cada lección es un paso más.")</span>
-        </nav>
-    </article>
+    </div>
 </div>

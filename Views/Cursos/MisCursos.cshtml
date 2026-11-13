@@ -1,64 +1,39 @@
-@model List<TarjetaCurso>
-@{ ViewData["Title"] = "Mis cursos"; }
-<div class="page-heading">
-    <div>
-        <h1>Tu aprendizaje, en marcha.</h1>
-        <p>Retoma donde lo dejaste. Cada lección cuenta.</p>
-    </div>
-    <a class="button button-secondary" asp-action="Index">Explorar catálogo <svg class="icon">
-            <use href="/img/icons.svg#arrow" />
-        </svg>
-    </a>
-</div>
-<div class="stats-strip">
-    <div>
-        <strong>@Model.Count</strong>
-        <span>Cursos inscritos</span>
-    </div>
-    <div>
-        <strong>@Model.Count(c => c.Lecciones > 0 && c.Progreso == 100)</strong>
-        <span>Cursos completados</span>
-    </div>
-    <div>
-        <strong>@Model.Sum(c => c.Completadas)</strong>
-        <span>Lecciones completadas</span>
-    </div>
-</div>
+@model List<MiCursoModelo>
+@{
+    ViewData["Title"] = "Mis cursos";
+}
+
+<h1>Mis cursos</h1>
+<p class="subtitulo">Los cursos en los que estás inscrito y tu progreso.</p>
+
 @if (Model.Count == 0)
 {
-<div class="empty-state">
-    <h2>Tu primer curso te espera</h2>
-    <p>Elige algo que te interese e inscríbete gratis para comenzar.</p>
-    <a class="button button-primary" asp-action="Index">Encontrar un curso</a>
-</div>
+    <div class="caja">
+        Aún no te inscribiste en ningún curso.
+        <a asp-action="Index">Ver el catálogo</a>
+    </div>
 }
-else
-{
-<div class="my-course-list">
-    @foreach (var curso in Model)
+
+<div class="grilla">
+    @foreach (var item in Model)
     {
-    <article class="my-course panel">
-        <div>
-            <partial name="_Portada" model="curso.Portada" />
-        </div>
-        <div>
-            <span class="muted small">@curso.Categoria · @curso.Nivel</span>
-            <h2>@curso.Titulo</h2>
-            <div class="progress-caption">
-                <span>@curso.Completadas de @curso.Lecciones lecciones</span>
-                <strong>@curso.Progreso%</strong>
+        <div class="tarjeta">
+            <div class="etiquetas">
+                <span class="etiqueta">@item.Curso.Categoria</span>
+                @if (!item.Curso.Publicado)
+                {
+                    <span class="etiqueta etiqueta-gris">Retirado</span>
+                }
             </div>
-            <progress max="100" value="@curso.Progreso">@curso.Progreso%</progress>
+            <h3>@item.Curso.Titulo</h3>
+            <div>
+                <div class="barra"><div style="width: @item.Porcentaje%"></div></div>
+                <small class="minutos">@item.Completadas de @item.Total lecciones · @item.Porcentaje%</small>
+            </div>
+            @if (item.Curso.Publicado)
+            {
+                <a class="boton" asp-action="Detalle" asp-route-id="@item.Curso.Id">Continuar</a>
+            }
         </div>
-        <div>
-            @if (curso.Publicado) { <a class="button button-secondary" asp-action="Detalle" asp-route-id="@curso.Id">@(curso.Progreso == 100 ? "Repasar" : "Continuar") <svg class="icon">
-                    <use href="/img/icons.svg#arrow" />
-                </svg>
-            </a> }
-            else { <span class="badge">No disponible</span>
-            <p class="small muted">El curso está retirado.<br />Tu progreso se conserva.</p> }
-        </div>
-    </article>
     }
 </div>
-}

@@ -1,103 +1,87 @@
 @model DetalleCursoModelo
-@{ ViewData["Title"] = Model.Curso.Titulo; var siguiente = Model.Lecciones.FirstOrDefault(l => !Model.Completadas.Contains(l.Id)) ?? Model.Lecciones.FirstOrDefault(); }
-<a class="back-link" asp-action="Index">← Volver al catálogo</a>
-<div class="detail-grid">
+@{
+    var curso = Model.Curso;
+    ViewData["Title"] = curso.Titulo;
+    int total = curso.Lecciones.Count;
+    int porcentaje = total == 0 ? 0 : Model.Completadas.Count * 100 / total;
+}
+
+<a class="volver" asp-action="Index">← Volver al catálogo</a>
+
+<div class="dos-columnas">
     <div>
-        <div class="detail-cover">
-            <partial name="_Portada" model="Model.Curso.Portada" />
-        </div>
-        <div class="detail-heading">
-            <div class="card-labels">
-                <span>@Model.Curso.Categoria</span>
-                <span class="badge">@Model.Curso.Nivel</span>
-            </div>
-            <h1>@Model.Curso.Titulo</h1>
-            <p class="lead">@Model.Curso.Descripcion</p>
-        </div>
-        <section class="panel" aria-labelledby="temario">
-            <div class="section-heading">
-                <h2 id="temario">Lo que vas a aprender</h2>
-                <span class="muted">@Model.Lecciones.Count lecciones</span>
-            </div>
-            <ol class="lesson-list">
-                @foreach (var leccion in Model.Lecciones)
+        <div class="caja">
+            <div class="etiquetas">
+                <span class="etiqueta">@curso.Categoria</span>
+                <span class="etiqueta etiqueta-gris">@curso.Nivel</span>
+                @if (!curso.Publicado)
                 {
-                <li>
-                    <span class="lesson-number">@leccion.Orden</span>
-                    <div>
-                        @if (Model.Inscrito) { <a asp-controller="Lecciones" asp-action="Leer" asp-route-id="@leccion.Id">@leccion.Titulo</a> }
-                        else { <span>@leccion.Titulo</span> }
-                        <small>@leccion.DuracionMinutos min de lectura y práctica</small>
-                    </div>
-                    <svg class="icon lesson-status">
-                        <use href="/img/icons.svg#@(Model.Completadas.Contains(leccion.Id) ? "check" : Model.Inscrito ? "arrow" : "lock")" />
-                    </svg>
-                </li>
+                    <span class="etiqueta etiqueta-gris">Borrador</span>
+                }
+            </div>
+            <h1>@curso.Titulo</h1>
+            <p>@curso.Descripcion</p>
+        </div>
+
+        <div class="caja">
+            <h2>Lecciones</h2>
+            <ol class="lista-lecciones">
+                @foreach (var leccion in curso.Lecciones)
+                {
+                    <li>
+                        <span>
+                            @leccion.Orden.
+                            @* enlace solo para inscritos, el servidor igual verifica *@
+                            @if (Model.Inscrito)
+                            {
+                                <a asp-controller="Lecciones" asp-action="Leer" asp-route-id="@leccion.Id">@leccion.Titulo</a>
+                            }
+                            else
+                            {
+                                @leccion.Titulo
+                            }
+                        </span>
+                        @if (Model.Completadas.Contains(leccion.Id))
+                        {
+                            <span class="completada">✔ Completada</span>
+                        }
+                        else
+                        {
+                            <span class="minutos">@leccion.DuracionMinutos min</span>
+                        }
+                    </li>
                 }
             </ol>
-        </section>
+        </div>
     </div>
-    <aside class="enrollment-panel panel">
-        <h2>Haz espacio para aprender.</h2>
-        <p>Contenido breve, práctica a tu ritmo y tu progreso siempre a mano.</p>
-        <dl class="course-facts">
-            <div>
-                <dt>Inscripción</dt>
-                <dd>Gratuita</dd>
-            </div>
-            <div>
-                <dt>Nivel</dt>
-                <dd>@Model.Curso.Nivel</dd>
-            </div>
-            <div>
-                <dt>Duración</dt>
-                <dd>@Model.Lecciones.Sum(l => l.DuracionMinutos) min</dd>
-            </div>
-            <div>
-                <dt>Formato</dt>
-                <dd>Texto y práctica</dd>
-            </div>
-        </dl>
+
+    <div class="caja">
+        <p><strong>Nivel:</strong> @curso.Nivel</p>
+        <p><strong>Duración:</strong> @curso.Lecciones.Sum(l => l.DuracionMinutos) minutos</p>
+        <p><strong>Lecciones:</strong> @total</p>
+        <p><strong>Precio:</strong> Gratis</p>
+
         @if (Model.Inscrito)
         {
-        <div class="progress-caption">
-            <span>Tu progreso</span>
-            <strong>@Model.Progreso%</strong>
-        </div>
-        <progress max="100" value="@Model.Progreso">@Model.Progreso%</progress>
-        @if (siguiente != null) { <a class="button button-primary full-width" asp-controller="Lecciones" asp-action="Leer" asp-route-id="@siguiente.Id">@(Model.Progreso == 100 ? "Repasar el curso" : Model.Progreso > 0 ? "Continuar aprendiendo" : "Comenzar curso") <svg class="icon">
-                <use href="/img/icons.svg#arrow" />
-            </svg>
-        </a> }
-        <p class="small muted">@Model.Completadas.Count de @Model.Lecciones.Count lecciones completadas</p>
+            <p><strong>Tu progreso:</strong> @porcentaje%</p>
+            <div class="barra"><div style="width: @porcentaje%"></div></div>
+            <small class="minutos">@Model.Completadas.Count de @total lecciones completadas</small>
         }
         else if (User.IsInRole("Administrador"))
         {
-        <a class="button button-primary full-width" asp-controller="Admin" asp-action="Lecciones" asp-route-id="@Model.Curso.Id">Gestionar lecciones</a>
+            <a class="boton" asp-controller="Admin" asp-action="Lecciones" asp-route-id="@curso.Id">Gestionar lecciones</a>
         }
-        else if (User.Identity?.IsAuthenticated == true)
+        else if (User.IsInRole("Suscriptor"))
         {
-        <form asp-action="Inscribirse" asp-route-id="@Model.Curso.Id" method="post">
-            <button class="button button-primary full-width" type="submit">Inscribirme gratis <svg class="icon">
-                    <use href="/img/icons.svg#arrow" />
-                </svg>
-            </button>
-        </form>
+            <form asp-action="Inscribirse" asp-route-id="@curso.Id" method="post">
+                <button class="boton" type="submit">Inscribirme gratis</button>
+            </form>
         }
         else
         {
-        <a class="button button-primary full-width" asp-controller="Cuenta" asp-action="Registro" asp-route-returnUrl="@Url.Action("Detalle", "Cursos", new { id = Model.Curso.Id })">Crear cuenta gratis <svg class="icon">
-                <use href="/img/icons.svg#arrow" />
-            </svg>
-        </a>
-        <p class="small">¿Ya tienes cuenta? <a class="text-link" asp-controller="Cuenta" asp-action="Ingresar" asp-route-returnUrl="@Url.Action("Detalle", "Cursos", new { id = Model.Curso.Id })">Inicia sesión</a>
-        </p>
+            <p>Para ver las lecciones debes crear una cuenta e inscribirte.</p>
+            <a class="boton" asp-controller="Cuenta" asp-action="Registro">Crear cuenta</a>
+            <a class="boton boton-secundario" asp-controller="Cuenta" asp-action="Ingresar">Ingresar</a>
         }
-        <div class="enrollment-note">
-            <svg class="icon">
-                <use href="/img/icons.svg#book" />
-            </svg>
-            <span>Aprende una lección a la vez.<br />Tú eliges cuándo continuar.</span>
-        </div>
-    </aside>
+    </div>
 </div>
