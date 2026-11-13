@@ -219,7 +219,7 @@ public class AdminController : Controller
     [HttpPost]
     public async Task<IActionResult> EliminarLeccion(int id)
     {
-        var leccion = await db.Lecciones.FindAsync(id);
+        var leccion = await db.Lecciones.Include(l => l.Curso).FirstOrDefaultAsync(l => l.Id == id);
         if (leccion == null) return NotFound();
 
         // primero borrar las completadas
@@ -227,9 +227,18 @@ public class AdminController : Controller
         db.Lecciones.Remove(leccion);
         await db.SaveChangesAsync();
 
-        await Renumerar(leccion.CursoId);
+        int restantes = await Renumerar(leccion.CursoId);
+        if (restantes == 0 && leccion.Curso.Publicado)
+        {
+            leccion.Curso.Publicado = false;
+            await db.SaveChangesAsync();
+            TempData["Exito"] = "Lección eliminada. El curso volvió a borrador porque quedó sin lecciones.";
+        }
+        else
+        {
+            TempData["Exito"] = "Lección eliminada.";
+        }
 
-        TempData["Exito"] = "Lección eliminada.";
         return RedirectToAction(nameof(Lecciones), new { id = leccion.CursoId });
     }
 
@@ -253,8 +262,8 @@ public class AdminController : Controller
         return RedirectToAction(nameof(Lecciones), new { id = leccion.CursoId });
     }
 
-    // deja el orden 1, 2, 3... sin huecos
-    private async Task Renumerar(int cursoId)
+    // deja el orden 1, 2, 3... sin huecos y devuelve cuántas quedan
+    private async Task<int> Renumerar(int cursoId)
     {
         var lecciones = await db.Lecciones
             .Where(l => l.CursoId == cursoId)
@@ -265,5 +274,6 @@ public class AdminController : Controller
             lecciones[i].Orden = i + 1;
 
         await db.SaveChangesAsync();
+        return lecciones.Count;
     }
 }

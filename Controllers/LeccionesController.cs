@@ -9,6 +9,7 @@ namespace Proyector_Web_3.Controllers;
 
 // solo suscriptores
 [Authorize(Roles = "Suscriptor")]
+[ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 public class LeccionesController : Controller
 {
     private readonly PortalContext db;

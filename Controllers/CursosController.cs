@@ -61,7 +61,7 @@ public class CursosController : Controller
     [Authorize(Roles = "Suscriptor")]
     public async Task<IActionResult> Inscribirse(int id)
     {
-        var curso = await db.Cursos.FirstOrDefaultAsync(c => c.Id == id && c.Publicado);
+        var curso = await db.Cursos.FirstOrDefaultAsync(c => c.Id == id && c.Publicado && c.Lecciones.Any());
         if (curso == null) return NotFound();
 
         // id desde la sesion
@@ -80,6 +80,7 @@ public class CursosController : Controller
 
     // mis cursos con progreso
     [Authorize(Roles = "Suscriptor")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public async Task<IActionResult> MisCursos()
     {
         var usuarioId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -88,6 +89,7 @@ public class CursosController : Controller
             .Include(i => i.Curso).ThenInclude(c => c.Lecciones)
             .Include(i => i.LeccionesCompletadas)
             .Where(i => i.UsuarioId == usuarioId)
+            .OrderByDescending(i => i.FechaInscripcion)
             .ToListAsync();
 
         var modelo = inscripciones.Select(i => new MiCursoModelo
