@@ -1,47 +1,37 @@
-@model List<Inscripcion>
-@{ ViewData["Title"] = "Suscriptores inscritos"; int totalLecciones = (int)(ViewData["TotalLecciones"] ?? 0); }
-<a class="back-link" asp-action="Index">← Volver a administración</a>
-<div class="page-heading">
-    <div>
-        <h1>Personas que aprenden.</h1>
-        <p>@ViewData["CursoTitulo"]</p>
-    </div>
-    <a class="button button-secondary" asp-action="Lecciones" asp-route-id="@ViewData["CursoId"]">Ver lecciones</a>
-</div>
-<p class="table-count">@Model.Count suscriptores inscritos</p>
-@if (Model.Count == 0)
+@model Curso
+@{
+    ViewData["Title"] = "Inscritos";
+    int total = Model.Lecciones.Count;
+}
+
+<a class="volver" asp-action="Index">← Volver</a>
+
+<h1>Inscritos en: @Model.Titulo</h1>
+
+@if (Model.Inscripciones.Count == 0)
 {
-<div class="empty-state">
-    <h2>El primer estudiante está por llegar</h2>
-    <p>Cuando alguien se inscriba, podrás consultar aquí su nombre, correo y progreso.</p>
-</div>
+    <div class="caja">Nadie se inscribió todavía en este curso.</div>
 }
 else
 {
-<div class="admin-table-wrapper">
-    <table class="admin-table">
-        <caption class="sr-only">Inscripciones del curso @ViewData["CursoTitulo"]</caption>
-        <thead>
+    <div class="tabla-contenedor">
+        <table>
             <tr>
-                <th>Suscriptor</th>
+                <th>Nombre</th>
                 <th>Correo</th>
-                <th class="num">Inscripción (UTC)</th>
-                <th class="num">Progreso</th>
+                <th>Fecha de inscripción</th>
+                <th>Progreso</th>
             </tr>
-        </thead>
-        <tbody>
-            @foreach (var inscripcion in Model)
+            @foreach (var inscripcion in Model.Inscripciones.OrderBy(i => i.FechaInscripcion))
             {
-            int progreso = totalLecciones == 0 ? 0 : inscripcion.LeccionesCompletadas.Count * 100 / totalLecciones;
-            <tr>
-                <td class="table-title">@inscripcion.Usuario.Nombre</td>
-                <td>@inscripcion.Usuario.Email</td>
-                <td class="num">@inscripcion.FechaInscripcion.ToString("yyyy-MM-dd")</td>
-                <td class="num">@progreso%<span class="muted small"> · @inscripcion.LeccionesCompletadas.Count / @totalLecciones</span>
-                </td>
-            </tr>
+                int completadas = inscripcion.LeccionesCompletadas.Count;
+                <tr>
+                    <td>@inscripcion.Usuario.Nombre</td>
+                    <td>@inscripcion.Usuario.Email</td>
+                    <td>@inscripcion.FechaInscripcion.ToLocalTime().ToString("dd/MM/yyyy")</td>
+                    <td>@completadas de @total lecciones</td>
+                </tr>
             }
-        </tbody>
-    </table>
-</div>
+        </table>
+    </div>
 }

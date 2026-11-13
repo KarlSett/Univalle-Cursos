@@ -1,43 +1,36 @@
 @model LeccionFormulario
-@{ bool editar = Model.Id > 0; ViewData["Title"] = editar ? "Editar lección" : "Agregar lección"; }
-<a class="back-link" asp-action="Lecciones" asp-route-id="@Model.CursoId">← @ViewData["CursoTitulo"]</a>
-<div class="page-heading">
-    <div>
-        <h1>@ViewData["Title"]</h1>
-        <p>Explica una idea y acompáñala con algo que se pueda practicar.</p>
-    </div>
+@{
+    bool editando = Model.Id > 0;
+    ViewData["Title"] = editando ? "Editar lección" : "Nueva lección";
+}
+
+<a class="volver" asp-action="Lecciones" asp-route-id="@Model.CursoId">← Volver a las lecciones</a>
+
+<div class="caja formulario">
+    <h1>@ViewData["Title"]</h1>
+
+    <form asp-action="@(editando ? "EditarLeccion" : "CrearLeccion")" method="post">
+        <input asp-for="Id" type="hidden" />
+        <input asp-for="CursoId" type="hidden" />
+
+        <div class="campo">
+            <label asp-for="Titulo">Título</label>
+            <input asp-for="Titulo" />
+            <span asp-validation-for="Titulo" class="error"></span>
+        </div>
+
+        <div class="campo">
+            <label asp-for="DuracionMinutos">Duración (minutos)</label>
+            <input asp-for="DuracionMinutos" />
+            <span asp-validation-for="DuracionMinutos" class="error"></span>
+        </div>
+
+        <div class="campo">
+            <label asp-for="Contenido">Contenido (texto)</label>
+            <textarea asp-for="Contenido" rows="12"></textarea>
+            <span asp-validation-for="Contenido" class="error"></span>
+        </div>
+
+        <button class="boton" type="submit">Guardar</button>
+    </form>
 </div>
-<form class="panel form-panel" asp-action="@(editar ? "EditarLeccion" : "CrearLeccion")" asp-route-id="@(editar ? Model.Id : (int?)null)" method="post">
-    <input asp-for="Id" type="hidden" />
-    <input asp-for="CursoId" type="hidden" />
-    <div asp-validation-summary="ModelOnly" role="alert">
-    </div>
-    <div class="form-field">
-        <label asp-for="Titulo">
-        </label>
-        <input asp-for="Titulo" maxlength="100" required />
-        <span asp-validation-for="Titulo">
-        </span>
-    </div>
-    <div class="form-field">
-        <label asp-for="DuracionMinutos">
-        </label>
-        <input asp-for="DuracionMinutos" type="number" min="1" max="180" required />
-        <span asp-validation-for="DuracionMinutos">
-        </span>
-        <small>Incluye el tiempo estimado para leer y realizar la práctica.</small>
-    </div>
-    <div class="form-field">
-        <label asp-for="Contenido">
-        </label>
-        <textarea class="content-editor" asp-for="Contenido" maxlength="20000" aria-describedby="contenido-ayuda" required>
-        </textarea>
-        <small id="contenido-ayuda">Escribe texto sencillo. Deja una línea vacía entre párrafos. Las etiquetas HTML se muestran como texto para explicar ejemplos de código.</small>
-        <span asp-validation-for="Contenido">
-        </span>
-    </div>
-    <div class="form-actions">
-        <button class="button button-primary" type="submit">Guardar lección</button>
-        <a class="button button-secondary" asp-action="Lecciones" asp-route-id="@Model.CursoId">Cancelar</a>
-    </div>
-</form>

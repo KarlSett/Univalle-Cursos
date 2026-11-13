@@ -1,65 +1,39 @@
 @model CursoFormulario
-@{ bool editar = Model.Id > 0; ViewData["Title"] = editar ? "Editar curso" : "Crear curso"; }
-<a class="back-link" asp-action="Index">← Volver a administración</a>
-<div class="page-heading">
-    <div>
-        <h1>@ViewData["Title"]</h1>
-        <p>Un título claro y una buena descripción son el primer paso.</p>
-    </div>
+@{
+    bool editando = Model.Id > 0;
+    ViewData["Title"] = editando ? "Editar curso" : "Nuevo curso";
+}
+
+<a class="volver" asp-action="Index">← Volver</a>
+
+<div class="caja formulario">
+    <h1>@ViewData["Title"]</h1>
+
+    <form asp-action="@(editando ? "Editar" : "Crear")" method="post">
+        <input asp-for="Id" type="hidden" />
+
+        <div class="campo">
+            <label asp-for="Titulo">Título</label>
+            <input asp-for="Titulo" />
+            <span asp-validation-for="Titulo" class="error"></span>
+        </div>
+
+        <div class="campo">
+            <label asp-for="Descripcion">Descripción</label>
+            <textarea asp-for="Descripcion" rows="4"></textarea>
+            <span asp-validation-for="Descripcion" class="error"></span>
+        </div>
+
+        <div class="campo">
+            <label asp-for="Categoria">Categoría</label>
+            <select asp-for="Categoria" asp-items="@(new SelectList(OpcionesCurso.Categorias))"></select>
+        </div>
+
+        <div class="campo">
+            <label asp-for="Nivel">Nivel</label>
+            <select asp-for="Nivel" asp-items="@(new SelectList(OpcionesCurso.Niveles))"></select>
+        </div>
+
+        <button class="boton" type="submit">Guardar</button>
+    </form>
 </div>
-<form class="panel form-panel" asp-action="@(editar ? "Editar" : "Crear")" asp-route-id="@(editar ? Model.Id : (int?)null)" method="post">
-    <input asp-for="Id" type="hidden" />
-    <div asp-validation-summary="ModelOnly" role="alert">
-    </div>
-    <div class="form-field">
-        <label asp-for="Titulo">
-        </label>
-        <input asp-for="Titulo" maxlength="80" placeholder="Por ejemplo: Tu primera página web" required />
-        <span asp-validation-for="Titulo">
-        </span>
-    </div>
-    <div class="form-field">
-        <label asp-for="Descripcion">
-        </label>
-        <textarea asp-for="Descripcion" rows="4" maxlength="1200" placeholder="¿Qué aprenderá el estudiante y qué necesita para comenzar?" required>
-        </textarea>
-        <span asp-validation-for="Descripcion">
-        </span>
-    </div>
-    <div class="form-row">
-        <div class="form-field">
-            <label asp-for="Categoria">
-            </label>
-            <select asp-for="Categoria">@foreach (var opcion in OpcionesCurso.Categorias) { <option value="@opcion">@opcion</option> }</select>
-            <span asp-validation-for="Categoria">
-            </span>
-        </div>
-        <div class="form-field">
-            <label asp-for="Nivel">
-            </label>
-            <select asp-for="Nivel">@foreach (var opcion in OpcionesCurso.Niveles) { <option value="@opcion">@opcion</option> }</select>
-            <span asp-validation-for="Nivel">
-            </span>
-        </div>
-    </div>
-    <div class="form-field">
-        <label asp-for="Portada">
-        </label>
-        <select asp-for="Portada">
-            <option value="web">Página web · HTML</option>
-            <option value="sql">Tabla · SQL</option>
-            <option value="git">Ramas · Git</option>
-            <option value="css">Diseño · CSS</option>
-            <option value="csharp">Código · C#</option>
-            <option value="excel">Hoja de cálculo · Excel</option>
-        </select>
-        <span asp-validation-for="Portada">
-        </span>
-        <small>Elige la ilustración que mejor representa el contenido del curso.</small>
-    </div>
-    <div class="form-actions">
-        <button class="button button-primary" type="submit">@(editar ? "Guardar cambios" : "Crear y agregar lecciones")</button>
-        <a class="button button-secondary" asp-action="Index">Cancelar</a>
-    </div>
-</form>
-<p class="edit-help">La duración se calcula sumando los minutos de las lecciones. Los cursos nuevos se guardan como borradores.</p>
