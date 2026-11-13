@@ -25,33 +25,40 @@
 
         <div class="caja">
             <h2>Lecciones</h2>
-            <ol class="lista-lecciones">
-                @foreach (var leccion in curso.Lecciones)
-                {
-                    <li>
-                        <span>
-                            @leccion.Orden.
-                            @* enlace solo para inscritos, el servidor igual verifica *@
-                            @if (Model.Inscrito)
+            @if (total == 0)
+            {
+                <p class="minutos">Este curso todavía no tiene lecciones cargadas.</p>
+            }
+            else
+            {
+                <ol class="lista-lecciones">
+                    @foreach (var leccion in curso.Lecciones)
+                    {
+                        <li>
+                            <span>
+                                @leccion.Orden.
+                                @* enlace solo para inscritos, el servidor igual verifica *@
+                                @if (Model.Inscrito)
+                                {
+                                    <a asp-controller="Lecciones" asp-action="Leer" asp-route-id="@leccion.Id">@leccion.Titulo</a>
+                                }
+                                else
+                                {
+                                    @leccion.Titulo
+                                }
+                            </span>
+                            @if (Model.Completadas.Contains(leccion.Id))
                             {
-                                <a asp-controller="Lecciones" asp-action="Leer" asp-route-id="@leccion.Id">@leccion.Titulo</a>
+                                <span class="completada">✔ Completada</span>
                             }
                             else
                             {
-                                @leccion.Titulo
+                                <span class="minutos">@leccion.DuracionMinutos min</span>
                             }
-                        </span>
-                        @if (Model.Completadas.Contains(leccion.Id))
-                        {
-                            <span class="completada">✔ Completada</span>
-                        }
-                        else
-                        {
-                            <span class="minutos">@leccion.DuracionMinutos min</span>
-                        }
-                    </li>
-                }
-            </ol>
+                        </li>
+                    }
+                </ol>
+            }
         </div>
     </div>
 
