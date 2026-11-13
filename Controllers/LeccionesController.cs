@@ -1,63 +1,82 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Proyector_Web_3.Data;
 using Proyector_Web_3.Models;
 
 namespace Proyector_Web_3.Controllers;
 
+// solo suscriptores
 [Authorize(Roles = "Suscriptor")]
-[ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 public class LeccionesController : Controller
 {
     private readonly PortalContext db;
-    public LeccionesController(PortalContext db) { this.db = db; }
 
+    public LeccionesController(PortalContext db)
+    {
+        this.db = db;
+    }
+
+    // leer leccion
     public async Task<IActionResult> Leer(int id)
     {
-        // Solo consultamos el identificador del curso antes de verificar el permiso.
-        var cursoId = await db.Lecciones.Where(l => l.Id == id).Select(l => (int?)l.CursoId).FirstOrDefaultAsync();
-        if (cursoId == null) return NotFound();
-        var inscripcion = await BuscarInscripcion(cursoId.Value);
+        var leccion = await db.Lecciones.Include(l => l.Curso).FirstOrDefaultAsync(l => l.Id == id);
+        if (leccion == null) return NotFound();
+
+        // verificacion en el servidor, aunque pongan la url a mano
+        var inscripcion = await BuscarInscripcion(leccion.CursoId);
         if (inscripcion == null) return Forbid();
 
-        // El contenido se recupera únicamente después de comprobar la inscripción en el servidor.
-        var leccion = await db.Lecciones.AsNoTracking().Include(l => l.Curso).FirstAsync(l => l.Id == id);
-        var modelo = new LecturaModelo
+        var modelo = new LeerLeccionModelo
         {
             Leccion = leccion,
-            Lecciones = await db.Lecciones.Where(l => l.CursoId == leccion.CursoId).OrderBy(l => l.Orden).ThenBy(l => l.Id)
-                .Select(l => new ResumenLeccion { Id = l.Id, Titulo = l.Titulo, Orden = l.Orden, DuracionMinutos = l.DuracionMinutos }).ToListAsync(),
-            Completadas = (await db.LeccionesCompletadas.Where(l => l.InscripcionId == inscripcion.Id).Select(l => l.LeccionId).ToListAsync()).ToHashSet()
+            Lecciones = await db.Lecciones
+                .Where(l => l.CursoId == leccion.CursoId)
+                .OrderBy(l => l.Orden)
+                .ToListAsync(),
+            Completadas = await db.LeccionesCompletadas
+                .Where(lc => lc.InscripcionId == inscripcion.Id)
+                .Select(lc => lc.LeccionId)
+                .ToListAsync()
         };
+
         return View(modelo);
     }
 
+    // marcar como completada
     [HttpPost]
     public async Task<IActionResult> Completar(int id)
     {
-        var cursoId = await db.Lecciones.Where(l => l.Id == id).Select(l => (int?)l.CursoId).FirstOrDefaultAsync();
-        if (cursoId == null) return NotFound();
-        var inscripcion = await BuscarInscripcion(cursoId.Value);
+        var leccion = await db.Lecciones.FindAsync(id);
+        if (leccion == null) return NotFound();
+
+        // misma verificacion
+        var inscripcion = await BuscarInscripcion(leccion.CursoId);
         if (inscripcion == null) return Forbid();
 
-        if (!await db.LeccionesCompletadas.AnyAsync(l => l.InscripcionId == inscripcion.Id && l.LeccionId == id))
+        bool yaCompletada = await db.LeccionesCompletadas
+            .AnyAsync(lc => lc.InscripcionId == inscripcion.Id && lc.LeccionId == id);
+
+        if (!yaCompletada)
         {
             db.LeccionesCompletadas.Add(new LeccionCompletada { InscripcionId = inscripcion.Id, LeccionId = id });
-            try { await db.SaveChangesAsync(); }
-            catch (DbUpdateException ex) when (ex.InnerException is SqlException { Number: 2601 or 2627 })
-            { /* El índice impide duplicar una lección completada. */ }
+            await db.SaveChangesAsync();
         }
-        TempData["Exito"] = "Lección completada. Tu progreso se ha guardado.";
+
+        TempData["Exito"] = "Lección marcada como completada.";
         return RedirectToAction(nameof(Leer), new { id });
     }
 
-    private Task<Inscripcion?> BuscarInscripcion(int cursoId)
+    // inscripcion del usuario en el curso (null si no hay)
+    // el curso tiene que estar publicado
+    private async Task<Inscripcion?> BuscarInscripcion(int cursoId)
     {
         var usuarioId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        return db.Inscripciones.FirstOrDefaultAsync(i =>
-            i.UsuarioId == usuarioId && i.CursoId == cursoId && i.Curso.Publicado);
+
+        return await db.Inscripciones.FirstOrDefaultAsync(i =>
+            i.UsuarioId == usuarioId &&
+            i.CursoId == cursoId &&
+            i.Curso.Publicado);
     }
 }
