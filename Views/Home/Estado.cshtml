@@ -1,8 +1,8 @@
-@model int
-@{ ViewData["Title"] = Model == 404 ? "Página no encontrada" : "No se pudo completar la solicitud"; }
-<div class="error-page panel">
-    <span class="page-code">@Model</span>
-    <h1>@ViewData["Title"]</h1>
-    <p>@(Model == 404 ? "El curso, la lección o la página que buscas no está disponible. Puedes volver al catálogo para seguir explorando." : "Revisa los datos enviados e inténtalo de nuevo.")</p>
-    <a class="button button-primary" asp-controller="Cursos" asp-action="Index">Volver al catálogo</a>
+@{
+    ViewData["Title"] = "Univalle Cursos";
+}
+
+<div class="caja">
+    <h1>Univalle Cursos</h1>
+    <a class="boton" asp-controller="Cursos" asp-action="Index">Ir al catálogo</a>
 </div>
