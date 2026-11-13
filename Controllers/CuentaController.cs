@@ -1,26 +1,24 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Proyector_Web_3.Models;
 
 namespace Proyector_Web_3.Controllers;
 
-[ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 public class CuentaController : Controller
 {
-    private readonly UserManager<Usuario> usuarios;
-    private readonly SignInManager<Usuario> sesion;
+    // usermanager: usuarios y roles, signinmanager: sesion
+    private readonly UserManager<Usuario> userManager;
+    private readonly SignInManager<Usuario> signInManager;
 
-    public CuentaController(UserManager<Usuario> usuarios, SignInManager<Usuario> sesion)
+    public CuentaController(UserManager<Usuario> userManager, SignInManager<Usuario> signInManager)
     {
-        this.usuarios = usuarios;
-        this.sesion = sesion;
+        this.userManager = userManager;
+        this.signInManager = signInManager;
     }
 
     [HttpGet]
     public IActionResult Ingresar(string? returnUrl)
     {
-        if (User.Identity?.IsAuthenticated == true) return RedirectToAction("Index", "Cursos");
         return View(new LoginModelo { ReturnUrl = returnUrl });
     }
 
@@ -28,60 +26,58 @@ public class CuentaController : Controller
     public async Task<IActionResult> Ingresar(LoginModelo modelo)
     {
         if (!ModelState.IsValid) return View(modelo);
-        var resultado = await sesion.PasswordSignInAsync(modelo.Email.Trim(), modelo.Password, modelo.Recordarme, lockoutOnFailure: true);
-        if (resultado.Succeeded) return Volver(modelo.ReturnUrl);
-        ModelState.AddModelError("", resultado.IsLockedOut
-            ? "Demasiados intentos. Espera cinco minutos antes de volver a intentarlo."
-            : "El correo o la contraseña no son correctos.");
-        return View(modelo);
+
+        var resultado = await signInManager.PasswordSignInAsync(modelo.Email, modelo.Password, false, false);
+        if (!resultado.Succeeded)
+        {
+            ModelState.AddModelError("", "Correo o contraseña incorrectos.");
+            return View(modelo);
+        }
+
+        // vuelve a la pagina anterior si es local
+        if (Url.IsLocalUrl(modelo.ReturnUrl)) return Redirect(modelo.ReturnUrl);
+        return RedirectToAction("Index", "Cursos");
     }
 
     [HttpGet]
-    public IActionResult Registro(string? returnUrl) => View(new RegistroModelo { ReturnUrl = returnUrl });
+    public IActionResult Registro()
+    {
+        return View(new RegistroModelo());
+    }
 
     [HttpPost]
     public async Task<IActionResult> Registro(RegistroModelo modelo)
     {
         if (!ModelState.IsValid) return View(modelo);
-        var usuario = new Usuario { Nombre = modelo.Nombre.Trim(), Email = modelo.Email.Trim(), UserName = modelo.Email.Trim() };
-        var resultado = await usuarios.CreateAsync(usuario, modelo.Password);
-        if (resultado.Succeeded)
+
+        var usuario = new Usuario { Nombre = modelo.Nombre, Email = modelo.Email, UserName = modelo.Email };
+        var resultado = await userManager.CreateAsync(usuario, modelo.Password);
+
+        if (!resultado.Succeeded)
         {
-            // El rol se asigna aquí; nunca se recibe desde el formulario de registro.
-            var rol = await usuarios.AddToRoleAsync(usuario, "Suscriptor");
-            if (!rol.Succeeded)
-            {
-                await usuarios.DeleteAsync(usuario);
-                ModelState.AddModelError("", "No se pudo crear la cuenta. Inténtalo nuevamente.");
-                return View(modelo);
-            }
-            await sesion.SignInAsync(usuario, isPersistent: false);
-            TempData["Exito"] = "Tu cuenta está lista. Elige tu primer curso.";
-            return Volver(modelo.ReturnUrl);
+            foreach (var error in resultado.Errors)
+                ModelState.AddModelError("", error.Description);
+            return View(modelo);
         }
-        foreach (var error in resultado.Errors)
-            ModelState.AddModelError("", error.Code.StartsWith("Duplicate")
-                ? "Ya existe una cuenta con ese correo."
-                : "Revisa tus datos. La contraseña necesita al menos 8 caracteres, una mayúscula, una minúscula y un número.");
-        return View(modelo);
+
+        // el rol lo pone el servidor
+        await userManager.AddToRoleAsync(usuario, "Suscriptor");
+        await signInManager.SignInAsync(usuario, false);
+
+        TempData["Exito"] = "Cuenta creada. Ya puedes inscribirte en los cursos.";
+        return RedirectToAction("Index", "Cursos");
     }
 
-    [HttpPost, Authorize]
+    [HttpPost]
     public async Task<IActionResult> Salir()
     {
-        await sesion.SignOutAsync();
+        await signInManager.SignOutAsync();
         return RedirectToAction("Index", "Cursos");
     }
 
+    // cuando no tiene permiso
     public IActionResult AccesoDenegado()
     {
-        Response.StatusCode = 403;
         return View();
-    }
-
-    private IActionResult Volver(string? ruta)
-    {
-        if (Url.IsLocalUrl(ruta)) return LocalRedirect(ruta!);
-        return RedirectToAction("Index", "Cursos");
     }
 }
