@@ -27,10 +27,10 @@ public class CuentaController : Controller
     {
         if (!ModelState.IsValid) return View(modelo);
 
-        var resultado = await signInManager.PasswordSignInAsync(modelo.Email, modelo.Password, false, false);
+        var resultado = await signInManager.PasswordSignInAsync(modelo.Email.Trim(), modelo.Password, false, false);
         if (!resultado.Succeeded)
         {
-            ModelState.AddModelError("", "Correo o contraseña incorrectos.");
+            ModelState.AddModelError("", "El correo o la contraseña no son correctos.");
             return View(modelo);
         }
 
@@ -50,13 +50,26 @@ public class CuentaController : Controller
     {
         if (!ModelState.IsValid) return View(modelo);
 
-        var usuario = new Usuario { Nombre = modelo.Nombre, Email = modelo.Email, UserName = modelo.Email };
+        var correo = modelo.Email.Trim();
+        var usuario = new Usuario { Nombre = modelo.Nombre.Trim(), Email = correo, UserName = correo };
         var resultado = await userManager.CreateAsync(usuario, modelo.Password);
 
         if (!resultado.Succeeded)
         {
-            foreach (var error in resultado.Errors)
-                ModelState.AddModelError("", error.Description);
+            var mensajes = resultado.Errors
+                .Select(e => e.Code switch
+                {
+                    "DuplicateUserName" or "DuplicateEmail" => "Ya existe una cuenta registrada con ese correo.",
+                    "PasswordTooShort" => "La contraseña debe tener al menos 8 caracteres.",
+                    "PasswordRequiresUpper" => "La contraseña debe incluir al menos una letra mayúscula.",
+                    "PasswordRequiresLower" => "La contraseña debe incluir al menos una letra minúscula.",
+                    "PasswordRequiresDigit" => "La contraseña debe incluir al menos un número.",
+                    _ => "Revisa los datos ingresados e inténtalo nuevamente."
+                })
+                .Distinct();
+
+            foreach (var mensaje in mensajes)
+                ModelState.AddModelError("", mensaje);
             return View(modelo);
         }
 

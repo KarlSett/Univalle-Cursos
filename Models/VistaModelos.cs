@@ -40,13 +40,18 @@ public class CursoFormulario
 {
     public int Id { get; set; }
 
-    [Required(ErrorMessage = "Escribe un título."), StringLength(80)]
+    [Required(ErrorMessage = "Escribe un título.")]
+    [StringLength(80, ErrorMessage = "El título no puede superar los 80 caracteres.")]
     public string Titulo { get; set; } = "";
 
-    [Required(ErrorMessage = "Escribe una descripción."), StringLength(1200)]
+    [Required(ErrorMessage = "Escribe una descripción.")]
+    [StringLength(1200, ErrorMessage = "La descripción no puede superar los 1200 caracteres.")]
     public string Descripcion { get; set; } = "";
 
+    [Required(ErrorMessage = "Selecciona una categoría.")]
     public string Categoria { get; set; } = "Desarrollo";
+
+    [Required(ErrorMessage = "Selecciona un nivel.")]
     public string Nivel { get; set; } = "Inicial";
 }
 
@@ -56,10 +61,12 @@ public class LeccionFormulario
     public int Id { get; set; }
     public int CursoId { get; set; }
 
-    [Required(ErrorMessage = "Escribe un título."), StringLength(100)]
+    [Required(ErrorMessage = "Escribe un título.")]
+    [StringLength(100, ErrorMessage = "El título no puede superar los 100 caracteres.")]
     public string Titulo { get; set; } = "";
 
-    [Required(ErrorMessage = "Escribe el contenido."), StringLength(20000)]
+    [Required(ErrorMessage = "Escribe el contenido.")]
+    [StringLength(20000, ErrorMessage = "El contenido es demasiado largo (máximo 20000 caracteres).")]
     public string Contenido { get; set; } = "";
 
     [Range(1, 180, ErrorMessage = "La duración debe estar entre 1 y 180 minutos.")]
@@ -69,17 +76,20 @@ public class LeccionFormulario
 public class RegistroModelo
 {
     [Required(ErrorMessage = "Escribe tu nombre.")]
-    [StringLength(80)]
+    [StringLength(80, ErrorMessage = "El nombre no puede superar los 80 caracteres.")]
     public string Nombre { get; set; } = "";
 
     [Required(ErrorMessage = "Escribe tu correo.")]
     [EmailAddress(ErrorMessage = "El correo no es válido.")]
+    [StringLength(256, ErrorMessage = "El correo es demasiado largo.")]
     public string Email { get; set; } = "";
 
     [Required(ErrorMessage = "Escribe una contraseña.")]
+    [StringLength(100, MinimumLength = 8, ErrorMessage = "La contraseña debe tener al menos 8 caracteres.")]
     [DataType(DataType.Password)]
     public string Password { get; set; } = "";
 
+    [Required(ErrorMessage = "Repite la contraseña.")]
     [Compare(nameof(Password), ErrorMessage = "Las contraseñas no coinciden.")]
     [DataType(DataType.Password)]
     public string Confirmacion { get; set; } = "";
@@ -89,9 +99,11 @@ public class LoginModelo
 {
     [Required(ErrorMessage = "Escribe tu correo.")]
     [EmailAddress(ErrorMessage = "El correo no es válido.")]
+    [StringLength(256, ErrorMessage = "El correo es demasiado largo.")]
     public string Email { get; set; } = "";
 
     [Required(ErrorMessage = "Escribe tu contraseña.")]
+    [StringLength(100, ErrorMessage = "La contraseña es demasiado larga.")]
     [DataType(DataType.Password)]
     public string Password { get; set; } = "";
 

@@ -10,6 +10,7 @@
     <h1>@ViewData["Title"]</h1>
 
     <form asp-action="@(editando ? "Editar" : "Crear")" method="post">
+        <div asp-validation-summary="ModelOnly"></div>
         <input asp-for="Id" type="hidden" />
 
         <div class="campo">
@@ -27,11 +28,13 @@
         <div class="campo">
             <label asp-for="Categoria">Categoría</label>
             <select asp-for="Categoria" asp-items="@(new SelectList(OpcionesCurso.Categorias))"></select>
+            <span asp-validation-for="Categoria" class="error"></span>
         </div>
 
         <div class="campo">
             <label asp-for="Nivel">Nivel</label>
             <select asp-for="Nivel" asp-items="@(new SelectList(OpcionesCurso.Niveles))"></select>
+            <span asp-validation-for="Nivel" class="error"></span>
         </div>
 
         <button class="boton" type="submit">Guardar</button>

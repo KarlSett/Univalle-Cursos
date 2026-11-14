@@ -40,13 +40,14 @@ public class AdminController : Controller
     [HttpPost]
     public async Task<IActionResult> Crear(CursoFormulario modelo)
     {
+        ValidarOpciones(modelo);
         if (!ModelState.IsValid) return View("Formulario", modelo);
 
         // empieza como borrador
         var curso = new Curso
         {
-            Titulo = modelo.Titulo,
-            Descripcion = modelo.Descripcion,
+            Titulo = modelo.Titulo.Trim(),
+            Descripcion = modelo.Descripcion.Trim(),
             Categoria = modelo.Categoria,
             Nivel = modelo.Nivel
         };
@@ -77,13 +78,14 @@ public class AdminController : Controller
     [HttpPost]
     public async Task<IActionResult> Editar(CursoFormulario modelo)
     {
+        ValidarOpciones(modelo);
         if (!ModelState.IsValid) return View("Formulario", modelo);
 
         var curso = await db.Cursos.FindAsync(modelo.Id);
         if (curso == null) return NotFound();
 
-        curso.Titulo = modelo.Titulo;
-        curso.Descripcion = modelo.Descripcion;
+        curso.Titulo = modelo.Titulo.Trim();
+        curso.Descripcion = modelo.Descripcion.Trim();
         curso.Categoria = modelo.Categoria;
         curso.Nivel = modelo.Nivel;
         await db.SaveChangesAsync();
@@ -163,6 +165,7 @@ public class AdminController : Controller
     [HttpPost]
     public async Task<IActionResult> CrearLeccion(LeccionFormulario modelo)
     {
+        if (!await db.Cursos.AnyAsync(c => c.Id == modelo.CursoId)) return NotFound();
         if (!ModelState.IsValid) return View("FormularioLeccion", modelo);
 
         // va al final
@@ -171,8 +174,8 @@ public class AdminController : Controller
         db.Lecciones.Add(new Leccion
         {
             CursoId = modelo.CursoId,
-            Titulo = modelo.Titulo,
-            Contenido = modelo.Contenido,
+            Titulo = modelo.Titulo.Trim(),
+            Contenido = modelo.Contenido.Trim(),
             DuracionMinutos = modelo.DuracionMinutos,
             Orden = cantidad + 1
         });
@@ -207,8 +210,8 @@ public class AdminController : Controller
         var leccion = await db.Lecciones.FindAsync(modelo.Id);
         if (leccion == null) return NotFound();
 
-        leccion.Titulo = modelo.Titulo;
-        leccion.Contenido = modelo.Contenido;
+        leccion.Titulo = modelo.Titulo.Trim();
+        leccion.Contenido = modelo.Contenido.Trim();
         leccion.DuracionMinutos = modelo.DuracionMinutos;
         await db.SaveChangesAsync();
 
@@ -275,5 +278,14 @@ public class AdminController : Controller
 
         await db.SaveChangesAsync();
         return lecciones.Count;
+    }
+
+    private void ValidarOpciones(CursoFormulario modelo)
+    {
+        if (!OpcionesCurso.Categorias.Contains(modelo.Categoria))
+            ModelState.AddModelError(nameof(modelo.Categoria), "Selecciona una categoría válida.");
+
+        if (!OpcionesCurso.Niveles.Contains(modelo.Nivel))
+            ModelState.AddModelError(nameof(modelo.Nivel), "Selecciona un nivel válido.");
     }
 }
