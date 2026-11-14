@@ -313,6 +313,29 @@ th { background: var(--guindo); color: white; font-weight: normal; }
 
 .titulo-seccion { margin-bottom: 4px; }
 
+/* filtros del catalogo */
+.filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 14px 0 20px;
+}
+
+.filtros input, .filtros select {
+    padding: 8px 12px;
+    border: 1px solid #c9c9cc;
+    border-radius: 6px;
+    font: inherit;
+    background: white;
+}
+
+.filtros input { flex: 1; min-width: 200px; }
+
+.filtros input:focus, .filtros select:focus {
+    outline: 2px solid var(--guindo);
+    border-color: var(--guindo);
+}
+
 /* cabecera de tarjeta */
 .tarjeta-cabecera {
     margin: -18px -18px 4px;

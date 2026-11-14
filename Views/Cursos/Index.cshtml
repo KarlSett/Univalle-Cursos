@@ -39,11 +39,34 @@
 
 @* catalogo *@
 <h2 id="cursos" class="titulo-seccion">Cursos disponibles</h2>
-<p class="subtitulo">@Model.Count cursos publicados</p>
+<p class="subtitulo">@Model.Count @(Model.Count == 1 ? "curso encontrado" : "cursos publicados")</p>
+
+<form class="filtros" method="get" asp-action="Index">
+    <input type="search" name="buscar" value="@ViewBag.Buscar" placeholder="Buscar por título o tema..." aria-label="Buscar cursos" />
+    <select name="categoria" aria-label="Filtrar por categoría">
+        <option value="">Todas las categorías</option>
+        @foreach (var cat in OpcionesCurso.Categorias)
+        {
+            <option value="@cat" selected="@((string?)ViewBag.Categoria == cat)">@cat</option>
+        }
+    </select>
+    <button class="boton" type="submit">Filtrar</button>
+    @if (!string.IsNullOrEmpty((string?)ViewBag.Buscar) || !string.IsNullOrEmpty((string?)ViewBag.Categoria))
+    {
+        <a class="boton boton-secundario" asp-action="Index">Limpiar</a>
+    }
+</form>
 
 @if (Model.Count == 0)
 {
-    <div class="caja">Todavía no hay cursos publicados.</div>
+    @if (!string.IsNullOrEmpty((string?)ViewBag.Buscar) || !string.IsNullOrEmpty((string?)ViewBag.Categoria))
+    {
+        <div class="caja">No se encontraron cursos con esos filtros. <a asp-action="Index">Ver todos los cursos</a></div>
+    }
+    else
+    {
+        <div class="caja">Todavía no hay cursos publicados.</div>
+    }
 }
 
 <div class="grilla">

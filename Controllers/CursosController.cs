@@ -16,12 +16,24 @@ public class CursosController : Controller
         this.db = db;
     }
 
-    // catalogo publico
-    public async Task<IActionResult> Index()
+    // catalogo publico con buscador y filtro por categoria
+    public async Task<IActionResult> Index(string? buscar, string? categoria)
     {
-        var cursos = await db.Cursos
+        var consulta = db.Cursos
             .Include(c => c.Lecciones)
-            .Where(c => c.Publicado)
+            .Where(c => c.Publicado);
+
+        buscar = buscar?.Trim();
+        if (!string.IsNullOrEmpty(buscar))
+            consulta = consulta.Where(c => c.Titulo.Contains(buscar) || c.Descripcion.Contains(buscar));
+
+        if (!string.IsNullOrEmpty(categoria))
+            consulta = consulta.Where(c => c.Categoria == categoria);
+
+        ViewBag.Buscar = buscar;
+        ViewBag.Categoria = categoria;
+
+        var cursos = await consulta
             .OrderBy(c => c.Titulo)
             .ToListAsync();
 
