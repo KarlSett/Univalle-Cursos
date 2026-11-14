@@ -22,14 +22,14 @@ Portal web de la Universidad Privada del Valle para publicar microcursos y tutor
 
 ## ¿Por qué usamos MVC y no Razor Pages?
 
-Elegimos **MVC** porque el proyecto tiene tres tipos de usuario con funciones distintas, y con MVC podemos separar cada parte en su propio controlador:
+Elegimos **ASP.NET Core MVC** porque el portal maneja flujos compartidos entre tres perfiles distintos (invitado, suscriptor y administrador) y el patrón Modelo–Vista–Controlador nos permite organizar cada módulo por responsabilidad:
 
-- `CursosController`: catálogo, detalle, inscripción y "mis cursos".
-- `LeccionesController`: leer y completar lecciones (solo inscritos).
-- `AdminController`: todo lo del administrador.
-- `CuentaController`: registro, ingreso y salida.
+- `CursosController`: catálogo público con búsqueda y filtro por categoría, detalle, inscripción y "Mis cursos".
+- `LeccionesController`: lectura de lecciones y registro de progreso (validando inscripción activa en el servidor).
+- `AdminController`: gestión completa de cursos, lecciones e inscritos.
+- `CuentaController`: registro, inicio y cierre de sesión con Identity.
 
-Así, con un solo atributo `[Authorize(Roles = "...")]` arriba del controlador protegemos todas sus acciones. Además, MVC separa claramente los datos (Model), las pantallas (View) y la lógica (Controller), y es el patrón que vimos en clase, por lo que nos resulta más fácil de explicar y de mantener. Razor Pages está pensado para páginas más independientes; aquí muchas pantallas comparten la misma lógica, por eso MVC nos ordena mejor el código.
+Al agrupar las acciones relacionadas en cada controlador, podemos proteger áreas enteras con un único atributo `[Authorize(Roles = "...")]`, reutilizar modelos de vista y mantener la lógica de negocio separada de las pantallas Razor. En cambio, Razor Pages funciona mejor para pantallas aisladas con lógica propia por archivo; en este proyecto nos resultaba más claro y mantenible centralizar las rutas y permisos por controlador, además de ser la arquitectura trabajada en clase.
 
 ## Modelo de datos
 
