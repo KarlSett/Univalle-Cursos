@@ -74,6 +74,22 @@ La primera vez, la aplicación crea sola la base `UnivalleMicrocursos` con sus t
 | Administrador | admin@univalle.edu | Admin12345 |
 | Suscriptor | estudiante@univalle.edu | Estudiante123 |
 
+## Cómo probar
+
+1. **Como invitado (sin iniciar sesión):**
+   - Entra a `/` para ver los cursos publicados, usar el buscador por texto y filtrar por categoría.
+   - Abre el detalle de un curso para revisar su descripción y temario.
+   - Si intentas abrir una lección directamente (por ejemplo `/Lecciones/Leer/1`), el sistema redirige a `/Cuenta/Ingresar`.
+2. **Como suscriptor (`estudiante@univalle.edu` / `Estudiante123` o creando una cuenta nueva):**
+   - Inicia sesión en **Ingresar**, entra a un curso y haz clic en **Inscribirme gratis**.
+   - Abre una lección, léela y presiona **Marcar como completada**.
+   - Entra a **Mis cursos** en el menú superior para verificar que el porcentaje de avance sube correctamente.
+   - Si ingresas manualmente la URL `/Lecciones/Leer/{id}` de un curso en el que no estás inscrito, el servidor responde `Acceso denegado`.
+3. **Como administrador (`admin@univalle.edu` / `Admin12345`):**
+   - Entra a **Administración** en el menú superior.
+   - Crea un curso nuevo (queda en estado **Borrador**), agrégale lecciones, ordénalas con las flechas `↑` / `↓` y publícalo desde la tabla.
+   - Consulta **Inscritos** en cualquier curso para ver la lista de estudiantes y cuántas lecciones completaron.
+
 ## Estructura del proyecto
 
 | Carpeta | Contenido |
